@@ -1,0 +1,65 @@
+:root {
+  --primary: #5b6ee8;
+  --primary-dark: #4353c7;
+  --primary-bg: #eef0fd;
+  --accent: #2f9e6a;
+  --accent-bg: #e4f6ed;
+  --danger: #d84c4c;
+  --text: #1f2130;
+  --text-soft: #5b5d6e;
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --border: #e2e4ee;
+  --shadow: rgba(20, 24, 60, 0.08) 0 4px 16px -4px;
+
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font: 16px/1.5 system-ui, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #7c8cf0;
+    --primary-dark: #aab4f7;
+    --primary-bg: #232748;
+    --accent: #4cc98a;
+    --accent-bg: #163227;
+    --danger: #ef6a6a;
+    --text: #eef0fb;
+    --text-soft: #a6a9c2;
+    --bg: #14151f;
+    --surface: #1b1d2b;
+    --border: #2c2f45;
+    --shadow: rgba(0, 0, 0, 0.35) 0 4px 16px -4px;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
