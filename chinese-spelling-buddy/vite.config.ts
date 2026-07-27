@@ -5,13 +5,13 @@ import { VitePWA } from 'vite-plugin-pwa'
 // https://vite.dev/config/
 export default defineConfig({
   // Deployed as a GitHub Pages *project* page at
-  // https://candicetaz.github.io/apps/ — an absolute base matching that path
-  // is required so every asset/chunk/fetch URL resolves correctly regardless
-  // of whether the page is hit with or without a trailing slash (a relative
-  // base like './' breaks — silently, with a blank page — the moment the
-  // URL is missing its trailing slash, since the browser then resolves
-  // "./assets/x.js" one directory too high).
-  base: '/apps/',
+  // https://candicetaz.github.io/chinesespelling/ — an absolute base
+  // matching that path is required so every asset/chunk/fetch URL resolves
+  // correctly regardless of whether the page is hit with or without a
+  // trailing slash (a relative base like './' breaks — silently, with a
+  // blank page — the moment the URL is missing its trailing slash, since
+  // the browser then resolves "./assets/x.js" one directory too high).
+  base: '/chinesespelling/',
   plugins: [
     react(),
     VitePWA({
