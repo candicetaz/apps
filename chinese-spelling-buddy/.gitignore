@@ -14,6 +14,8 @@ dist-ssr
 
 # Generated at build/dev time by scripts/build-dictionary.mjs from cedict-json
 public/dictionary.json
+# Generated at build/dev time by scripts/build-decomposition.mjs from third_party/
+public/decomposition.json
 
 # Editor directories and files
 .vscode/*

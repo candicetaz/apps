@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Eye,
   Grid2x2,
+  Lightbulb,
   Pause,
   PartyPopper,
   Play,
@@ -18,13 +19,14 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import { resolveDisplayMeanings, segmentAndAnnotate } from '../lib/segment';
+import { isChineseChar, resolveDisplayMeanings, segmentAndAnnotate } from '../lib/segment';
 import { isSpeechSupported } from '../lib/speech';
 import { useSpeechPlayback } from '../lib/useSpeechPlayback';
+import { getMnemonicsForText, loadDecomposition } from '../lib/mnemonics';
 import { getRecallSpeed, recordRecallAttempt, setRecallSpeed } from '../lib/storage';
 import { groupByDay } from '../lib/groupByDay';
 import { FreehandCanvas } from './FreehandCanvas';
-import type { AnnotatedSegment, Dictionary, SavedPhrase } from '../types';
+import type { AnnotatedSegment, DecompositionData, Dictionary, SavedPhrase } from '../types';
 
 interface RecallModeProps {
   savedPhrases: SavedPhrase[];
@@ -95,6 +97,7 @@ export function RecallMode({ savedPhrases, dict, onGoToReader }: RecallModeProps
       <RecallSession
         key={session.key}
         initialCards={session.cards}
+        dict={dict}
         randomOrder={randomOrder}
         onRetestCards={(cards) => setSession((prev) => ({ key: (prev?.key ?? 0) + 1, cards }))}
         onExit={() => setSession(null)}
@@ -214,11 +217,13 @@ export function RecallMode({ savedPhrases, dict, onGoToReader }: RecallModeProps
 
 function RecallSession({
   initialCards,
+  dict,
   randomOrder,
   onRetestCards,
   onExit,
 }: {
   initialCards: RecallCard[];
+  dict: Dictionary;
   randomOrder: boolean;
   onRetestCards: (cards: RecallCard[]) => void;
   onExit: () => void;
@@ -228,8 +233,15 @@ function RecallSession({
   const [revealed, setRevealed] = useState(false);
   const [finalResults, setFinalResults] = useState<Record<string, boolean>>({});
   const [retryCounts, setRetryCounts] = useState<Record<string, number>>({});
+  const [decomp, setDecomp] = useState<DecompositionData | null>(null);
   const [speed, setSpeed] = useState(() => getRecallSpeed());
   const { isSpeaking, isPaused, play: playText, togglePause: togglePausePlayback } = useSpeechPlayback();
+
+  useEffect(() => {
+    loadDecomposition()
+      .then(setDecomp)
+      .catch(() => setDecomp({}));
+  }, []);
 
   const speechSupported = isSpeechSupported();
   const current = queue[index];
@@ -344,6 +356,7 @@ function RecallSession({
 
   if (!current) return null;
 
+  const mnemonics = decomp ? getMnemonicsForText(current.displayText, decomp, dict, isChineseChar) : [];
   const chineseSegments = current.segments.filter((s) => s.isChinese);
 
   return (
@@ -448,6 +461,21 @@ function RecallSession({
                 </ul>
               </div>
             ))}
+
+            {mnemonics.length > 0 && (
+              <div className="mnemonic-box">
+                <h3 className="icon-inline">
+                  <Lightbulb size={16} aria-hidden="true" /> Creative ways to remember
+                </h3>
+                <ul>
+                  {mnemonics.map((m) => (
+                    <li key={m.char}>
+                      <strong>{m.char}</strong>: {m.hint ?? 'No breakdown available — make up your own story for this one!'}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -22,6 +22,13 @@ as a listening/recall flashcard drill.
   it. Missed cards resurface later in the same session.
 - **Progress** — aggregate stats pulled from local practice history.
 
+Tapping a word (in Reader, or after revealing an answer in Test) also shows
+"Creative ways to remember" — a per-character mnemonic built from
+[Make Me a Hanzi](https://github.com/skishore/makemeahanzi) decomposition
+data: a human-written etymology hint where one exists, otherwise a
+generated "built from X + Y" breakdown using the components' own dictionary
+meanings.
+
 Everything is stored locally (`localStorage`) — no account, no backend.
 
 ## Fixed: writing area missing in "whole sentences" mode
@@ -43,8 +50,11 @@ npm run lint
 ```
 
 `npm run dev` / `npm run build` first regenerate `public/dictionary.json`
-from the `cedict-json` package (see `scripts/build-dictionary.mjs`) — it's
-gitignored since it's a derived asset, not source.
+(from the `cedict-json` package, see `scripts/build-dictionary.mjs`) and
+`public/decomposition.json` (from the vendored
+`third_party/makemeahanzi-dictionary.txt`, see
+`scripts/build-decomposition.mjs`) — both are gitignored since they're
+derived assets, not source.
 
 Deploys to GitHub Pages via `.github/workflows/deploy.yml` on pushes to
 `main` that touch this folder.
@@ -54,4 +64,7 @@ Deploys to GitHub Pages via `.github/workflows/deploy.yml` on pushes to
 Short version: stroke data for Practise loads from a CDN at runtime (no
 bundled offline stroke set), there's no OCR/camera-scan input, no
 spaced-repetition scheduling, and the CC-CEDICT dictionary won't have every
-proper noun or slang term.
+proper noun or slang term. Mnemonics only cover the ~9.5k characters Make Me
+a Hanzi has decomposition data for, and only some of those have a
+human-written etymology hint — the rest fall back to a generated
+"built from X + Y" breakdown.

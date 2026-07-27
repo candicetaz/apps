@@ -32,4 +32,10 @@ export interface RecallAttemptRecord {
   attemptedAt: number;
 }
 
+// Character decomposition + etymology data (from the Make Me a Hanzi
+// project) used to generate "creative way to remember" mnemonics.
+// d = decomposition (IDS string), h = human-written etymology hint,
+// t = etymology type (pictographic/ideographic/pictophonetic).
+export type DecompositionData = Record<string, { d?: string; h?: string; t?: string }>;
+
 export type ViewName = 'reader' | 'saved' | 'practise' | 'test' | 'progress';

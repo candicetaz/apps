@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "build:dict": "node scripts/build-dictionary.mjs",
-    "predev": "node scripts/build-dictionary.mjs",
-    "prebuild": "node scripts/build-dictionary.mjs",
+    "build:decomp": "node scripts/build-decomposition.mjs",
+    "predev": "npm run build:dict && npm run build:decomp",
+    "prebuild": "npm run build:dict && npm run build:decomp",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",

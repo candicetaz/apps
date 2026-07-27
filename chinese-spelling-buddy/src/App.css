@@ -289,6 +289,29 @@
   padding-left: 20px;
 }
 
+.mnemonic-box {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--accent-bg);
+  color: var(--text);
+}
+
+.mnemonic-box h3 {
+  margin: 0 0 6px;
+  color: var(--accent);
+}
+
+.mnemonic-box ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+.mnemonic-box li + li {
+  margin-top: 4px;
+}
+
 /* Day groups / saved list */
 
 .day-groups {
