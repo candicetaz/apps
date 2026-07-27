@@ -110,6 +110,20 @@
   color: var(--danger);
 }
 
+.error-boundary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--danger);
+}
+
+.error-boundary p {
+  color: var(--text);
+}
+
 .icon-inline {
   display: inline-flex;
   align-items: center;
@@ -408,6 +422,13 @@
 .saved-text {
   flex: 1;
   font-size: 16px;
+}
+
+.saved-text-btn {
+  border: none;
+  background: none;
+  text-align: left;
+  color: var(--text);
 }
 
 .saved-row-actions {
@@ -746,13 +767,82 @@
   gap: 18px;
 }
 
-.progress-stat-grid {
+.progress-view h2 {
+  margin: 0 0 -8px;
+  font-size: 15px;
+}
+
+.level-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--primary-bg);
+  color: var(--primary-dark);
+}
+
+.level-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.level-sub {
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.xp-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.xp-label {
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.streak-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.streak-flame {
+  color: #e08a2b;
+  flex-shrink: 0;
+}
+
+.streak-days {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.streak-sub {
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
-.progress-stat {
+.stat-tile {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -761,51 +851,51 @@
   border-radius: 14px;
   background: var(--surface);
   border: 1px solid var(--border);
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 600;
   color: var(--primary-dark);
 }
 
-.progress-stat-value {
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.progress-stat-label {
+.stat-label {
   font-size: 12px;
   text-align: center;
   color: var(--text-soft);
 }
 
-.progress-tricky h3 {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 15px;
-  margin: 0 0 8px;
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-.progress-tricky-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.badge-tile {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.progress-tricky-list li {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: var(--surface);
+  gap: 6px;
+  padding: 14px 8px;
+  border-radius: 14px;
   border: 1px solid var(--border);
+  text-align: center;
 }
 
-.progress-tricky-ratio {
-  font-size: 13px;
+.badge-achieved {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.badge-locked {
+  background: var(--surface);
   color: var(--text-soft);
+  opacity: 0.6;
+}
+
+.badge-label {
+  font-size: 11px;
+  line-height: 1.3;
 }
 
 /* Camera scan / OCR */

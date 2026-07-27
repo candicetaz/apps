@@ -154,7 +154,7 @@ function App() {
           )}
 
           {dict && view === 'saved' && (
-            <SavedList phrases={savedPhrases} onOpen={handleOpenInReader} onDelete={handleDelete} />
+            <SavedList phrases={savedPhrases} dict={dict} onOpen={handleOpenInReader} onDelete={handleDelete} />
           )}
 
           {view === 'practise' && (

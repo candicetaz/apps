@@ -75,20 +75,3 @@ export function getRecallSpeed(): number {
 export function setRecallSpeed(rate: number): void {
   localStorage.setItem(RECALL_SPEED_KEY, String(rate));
 }
-
-export interface CharacterStat {
-  char: string;
-  attempts: number;
-  correct: number;
-}
-
-export function getCharacterStats(): CharacterStat[] {
-  const byChar = new Map<string, CharacterStat>();
-  for (const a of getTestAttempts()) {
-    const stat = byChar.get(a.char) ?? { char: a.char, attempts: 0, correct: 0 };
-    stat.attempts += 1;
-    if (a.correct) stat.correct += 1;
-    byChar.set(a.char, stat);
-  }
-  return Array.from(byChar.values()).sort((a, b) => a.correct / a.attempts - b.correct / b.attempts);
-}

@@ -1,61 +1,110 @@
-import { useMemo } from 'react';
-import { AlertTriangle, Sparkles, Trophy } from 'lucide-react';
-import { getCharacterStats, getRecallAttempts, getTestAttempts } from '../lib/storage';
+import { useState } from 'react';
+import {
+  Award,
+  BookOpen,
+  Flame,
+  Gem,
+  GraduationCap,
+  Library,
+  Lock,
+  PenLine,
+  Star,
+  Trophy,
+  type LucideIcon,
+} from 'lucide-react';
+import { getProgressStats, type BadgeKey } from '../lib/progress';
+
+const BADGE_ICONS: Record<BadgeKey, LucideIcon> = {
+  'streak-3': Flame,
+  'streak-7': Flame,
+  'first-word': BookOpen,
+  'words-10': Library,
+  'words-50': GraduationCap,
+  'first-perfect-char': PenLine,
+  'perfect-chars-20': Award,
+  'xp-100': Star,
+  'xp-500': Gem,
+};
 
 export function ProgressView() {
-  const testAttempts = useMemo(() => getTestAttempts(), []);
-  const recallAttempts = useMemo(() => getRecallAttempts(), []);
-  const charStats = useMemo(() => getCharacterStats(), []);
-
-  const perfectCount = testAttempts.filter((a) => a.correct).length;
-  const recallKnowCount = recallAttempts.filter((a) => a.know).length;
-  const trickiest = charStats.filter((s) => s.attempts >= 2).slice(0, 10);
-
-  const hasAnyData = testAttempts.length > 0 || recallAttempts.length > 0;
-
-  if (!hasAnyData) {
-    return (
-      <p className="empty-state">
-        No practice history yet. Try a round in <strong>Practise</strong> or <strong>Test</strong> and come back here.
-      </p>
-    );
-  }
+  const [stats] = useState(() => getProgressStats());
+  const hasActivity = stats.wordsSeen > 0 || stats.charactersPracticed > 0;
 
   return (
     <div className="progress-view">
-      <div className="progress-stat-grid">
-        <div className="progress-stat">
-          <Trophy size={24} aria-hidden="true" />
-          <span className="progress-stat-value">
-            {testAttempts.length ? `${perfectCount}/${testAttempts.length}` : '—'}
-          </span>
-          <span className="progress-stat-label">Characters written perfectly</span>
+      <div className="level-card">
+        <div className="level-title icon-inline">
+          <Award size={24} aria-hidden="true" />
+          {stats.level.title}
         </div>
-        <div className="progress-stat">
-          <Sparkles size={24} aria-hidden="true" />
-          <span className="progress-stat-value">
-            {recallAttempts.length ? `${recallKnowCount}/${recallAttempts.length}` : '—'}
-          </span>
-          <span className="progress-stat-label">Test cards marked "I know it"</span>
+        <div className="level-sub">Level {stats.level.levelNumber}</div>
+        {!stats.level.isMaxLevel && (
+          <div className="xp-bar">
+            <div
+              className="xp-bar-fill"
+              style={{ width: `${Math.min(100, (stats.level.xpIntoLevel / stats.level.xpForNextLevel!) * 100)}%` }}
+            />
+          </div>
+        )}
+        <div className="xp-label">
+          {stats.level.isMaxLevel
+            ? `${stats.xp} XP — max level reached!`
+            : `${stats.level.xpIntoLevel} / ${stats.level.xpForNextLevel} XP to next level`}
         </div>
       </div>
 
-      {trickiest.length > 0 && (
-        <div className="progress-tricky">
-          <h3 className="icon-inline">
-            <AlertTriangle size={18} aria-hidden="true" /> Characters to review
-          </h3>
-          <ul className="progress-tricky-list">
-            {trickiest.map((s) => (
-              <li key={s.char}>
-                <span className="summary-char">{s.char}</span>
-                <span className="progress-tricky-ratio">
-                  {s.correct}/{s.attempts} perfect
-                </span>
-              </li>
-            ))}
-          </ul>
+      <div className="streak-card">
+        <Flame className="streak-flame" aria-hidden="true" size={40} />
+        <div>
+          <div className="streak-days">
+            {stats.streak.current} day{stats.streak.current === 1 ? '' : 's'} streak
+          </div>
+          <div className="streak-sub">
+            {stats.streak.current === 0
+              ? 'Practice today to start a streak!'
+              : `Longest streak: ${stats.streak.longest} day${stats.streak.longest === 1 ? '' : 's'}`}
+          </div>
         </div>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-tile">
+          <div className="stat-value">{stats.wordsKnown}</div>
+          <div className="stat-label">Words &amp; phrases known</div>
+        </div>
+        <div className="stat-tile">
+          <div className="stat-value">{stats.charactersPracticed}</div>
+          <div className="stat-label">Characters practiced</div>
+        </div>
+        <div className="stat-tile">
+          <div className="stat-value">{stats.perfectCharacters}</div>
+          <div className="stat-label">Perfect characters</div>
+        </div>
+        <div className="stat-tile">
+          <div className="stat-value">{stats.xp}</div>
+          <div className="stat-label">Total XP</div>
+        </div>
+      </div>
+
+      <h2 className="icon-inline">
+        <Trophy size={18} aria-hidden="true" /> Badges
+      </h2>
+      <div className="badges-grid">
+        {stats.badges.map((b) => {
+          const Icon = b.achieved ? BADGE_ICONS[b.key] : Lock;
+          return (
+            <div key={b.label} className={`badge-tile ${b.achieved ? 'badge-achieved' : 'badge-locked'}`}>
+              <Icon className="badge-icon" aria-hidden="true" size={28} />
+              <div className="badge-label">{b.label}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {!hasActivity && (
+        <p className="empty-state">
+          No activity yet — try the <strong>Test</strong> or <strong>Practise</strong> tabs to start earning XP!
+        </p>
       )}
     </div>
   );

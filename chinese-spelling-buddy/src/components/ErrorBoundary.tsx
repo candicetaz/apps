@@ -1,31 +1,43 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { AlertTriangle, RotateCcw } from 'lucide-react';
 
-interface Props {
+interface ErrorBoundaryProps {
   children: ReactNode;
 }
 
-interface State {
-  error: Error | null;
+interface ErrorBoundaryState {
+  hasError: boolean;
 }
 
-/** Keeps one view crashing (e.g. a bad saved phrase) from blanking the whole app. */
-export class ErrorBoundary extends Component<Props, State> {
-  state: State = { error: null };
+// A crash anywhere in the tree below this (e.g. a third-party library like
+// HanziWriter choking on unexpected data) would otherwise unmount the whole
+// app and leave a blank page requiring a manual refresh. This catches it and
+// offers a way back in without losing everything else in the app.
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { hasError: false };
 
-  static getDerivedStateFromError(error: Error): State {
-    return { error };
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('View crashed:', error, info.componentStack);
+    console.error('Caught by ErrorBoundary:', error, info);
   }
 
+  handleReset = (): void => {
+    this.setState({ hasError: false });
+  };
+
   render() {
-    if (this.state.error) {
+    if (this.state.hasError) {
       return (
-        <p className="error-state">
-          Something went wrong showing this screen. Try switching tabs and back.
-        </p>
+        <div className="error-boundary">
+          <AlertTriangle size={32} aria-hidden="true" />
+          <p>Something went wrong on this screen.</p>
+          <button type="button" className="btn btn-primary" onClick={this.handleReset}>
+            <RotateCcw size={18} aria-hidden="true" /> Try again
+          </button>
+        </div>
       );
     }
     return this.props.children;

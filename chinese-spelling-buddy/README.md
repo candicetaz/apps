@@ -15,7 +15,9 @@ an offline-capable PWA.
   meanings (from CC-CEDICT). Tap a word for its full definition, hit "Read
   aloud" to hear the whole thing via the browser's speech synthesis, or
   save it (as one phrase, or split into individual words) to My List.
-- **My List** — saved phrases grouped by day, reopen in Reader or delete.
+- **My List** — saved phrases grouped by day. Tap a single saved word to
+  preview its meaning right there; tap a multi-word phrase to open it in
+  Reader instead. Delete from either.
 - **Practise** — stroke-order writing quiz per character, powered by
   `hanzi-writer` against a locally-bundled stroke-data set (no third-party
   CDN dependency). Mistakes are tracked; "Show me how" replays the correct
@@ -24,7 +26,10 @@ an offline-capable PWA.
   drill them as individual words or as whole sentences, listen, write the
   answer by hand in the scratch pad, then reveal and mark whether you knew
   it. Missed cards resurface later in the same session.
-- **Progress** — aggregate stats pulled from local practice history.
+- **Progress** — a level/XP system (7 levels from "Sprout" to "Grand
+  Scholar"), a day streak counter, stats (words known, characters
+  practiced, perfect characters), and 9 unlockable badges — all computed
+  from local Test/Practise history.
 
 Tapping a word (in Reader, or after revealing an answer in Test) also shows
 "Creative ways to remember" — a per-character mnemonic built from
