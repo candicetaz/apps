@@ -436,6 +436,104 @@
   gap: 4px;
 }
 
+/* List filter chips + list manager panel */
+
+.list-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.list-filter-chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.list-filter-chip-active {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  color: var(--primary-dark);
+}
+
+.list-manager-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.list-manager-items {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.list-manager-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.list-manager-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 15px;
+}
+
+.list-manager-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.list-manager-toggle-checked .list-manager-checkbox {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.list-manager-row-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.list-manager-rename-form {
+  flex: 1;
+}
+
+.list-manager-new-form {
+  display: flex;
+  gap: 8px;
+}
+
+.list-manager-input {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 15px;
+}
+
 .recall-checkbox-row {
   display: flex;
   align-items: center;

@@ -3,12 +3,21 @@ import { BookOpen, Bookmark, Headphones, Languages, PenLine, Trophy } from 'luci
 import { loadDictionary } from './lib/dictionary';
 import { filterToChineseAndPunctuation } from './lib/segment';
 import { primeVoices } from './lib/speech';
-import { deleteSavedPhrase, getSavedPhrases, savePhrase } from './lib/storage';
+import {
+  createList,
+  deleteList,
+  deleteSavedPhrase,
+  getLists,
+  getSavedPhrases,
+  renameList,
+  savePhrase,
+  setPhraseListIds,
+} from './lib/storage';
 import { ReaderView } from './components/ReaderView';
 import { SavedList } from './components/SavedList';
 import { InstallButton } from './components/InstallButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import type { Dictionary, SavedPhrase, ViewName } from './types';
+import type { Dictionary, SavedPhrase, ViewName, WordList } from './types';
 import './App.css';
 
 // A tab left open across a new deploy still holds an index.html that
@@ -51,6 +60,7 @@ function App() {
   const [readerText, setReaderText] = useState('');
   const [practisePhrase, setPractisePhrase] = useState<SavedPhrase | null>(null);
   const [savedPhrases, setSavedPhrases] = useState<SavedPhrase[]>(() => getSavedPhrases());
+  const [lists, setLists] = useState<WordList[]>(() => getLists());
 
   useEffect(() => {
     primeVoices();
@@ -86,6 +96,28 @@ function App() {
     deleteSavedPhrase(id);
     refreshSaved();
     if (practisePhrase?.id === id) setPractisePhrase(null);
+  }
+
+  function handleSetPhraseListIds(phraseId: string, listIds: string[]) {
+    setPhraseListIds(phraseId, listIds);
+    refreshSaved();
+  }
+
+  function handleCreateList(name: string): WordList {
+    const list = createList(name);
+    setLists(getLists());
+    return list;
+  }
+
+  function handleRenameList(id: string, name: string) {
+    renameList(id, name);
+    setLists(getLists());
+  }
+
+  function handleDeleteList(id: string) {
+    deleteList(id);
+    setLists(getLists());
+    refreshSaved();
   }
 
   return (
@@ -154,7 +186,17 @@ function App() {
           )}
 
           {dict && view === 'saved' && (
-            <SavedList phrases={savedPhrases} dict={dict} onOpen={handleOpenInReader} onDelete={handleDelete} />
+            <SavedList
+              phrases={savedPhrases}
+              dict={dict}
+              lists={lists}
+              onOpen={handleOpenInReader}
+              onDelete={handleDelete}
+              onSetPhraseListIds={handleSetPhraseListIds}
+              onCreateList={handleCreateList}
+              onRenameList={handleRenameList}
+              onDeleteList={handleDeleteList}
+            />
           )}
 
           {view === 'practise' && (

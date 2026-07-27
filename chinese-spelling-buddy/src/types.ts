@@ -15,6 +15,15 @@ export interface SavedPhrase {
   id: string;
   text: string;
   createdAt: number;
+  // Ids of the WordLists this phrase belongs to. A phrase can be in any
+  // number of lists (including none — "unfiled", still shown in My List).
+  listIds: string[];
+}
+
+export interface WordList {
+  id: string;
+  name: string;
+  createdAt: number;
 }
 
 export interface TestAttemptRecord {
