@@ -1,20 +1,24 @@
 # Chinese Spelling Buddy
 
-A study tool for Mandarin Chinese: paste a word, phrase, or sentence to see
-pinyin and English meanings, hear it read aloud, save it to a personal list,
-then practise writing it — either stroke-by-stroke per character, or by ear
-as a listening/recall flashcard drill.
+A study tool for Mandarin Chinese: paste (or photograph) a word, phrase, or
+sentence to see pinyin and English meanings, hear it read aloud, save it to
+a personal list, then practise writing it — either stroke-by-stroke per
+character, or by ear as a listening/recall flashcard drill. Installable as
+an offline-capable PWA.
 
 ## Views
 
-- **Reader** — paste Chinese text. It's segmented into words with pinyin
-  (context-aware, via `pinyin-pro`) and dictionary meanings (from
-  CC-CEDICT). Tap a word for its full definition, hit "Read aloud" to hear
-  the whole thing via the browser's speech synthesis, or save it (as one
-  phrase, or split into individual words) to My List.
+- **Reader** — paste Chinese text, or tap **Scan a list** to photograph a
+  worksheet/textbook page (OCR runs fully offline in the browser via
+  PP-OCRv4 + ONNX Runtime Web — no server, no API key). Text is segmented
+  into words with pinyin (context-aware, via `pinyin-pro`) and dictionary
+  meanings (from CC-CEDICT). Tap a word for its full definition, hit "Read
+  aloud" to hear the whole thing via the browser's speech synthesis, or
+  save it (as one phrase, or split into individual words) to My List.
 - **My List** — saved phrases grouped by day, reopen in Reader or delete.
 - **Practise** — stroke-order writing quiz per character, powered by
-  `hanzi-writer`. Mistakes are tracked; "Show me how" replays the correct
+  `hanzi-writer` against a locally-bundled stroke-data set (no third-party
+  CDN dependency). Mistakes are tracked; "Show me how" replays the correct
   stroke order.
 - **Test** — audio flashcard recall: pick saved phrases, choose whether to
   drill them as individual words or as whole sentences, listen, write the
@@ -49,22 +53,24 @@ npm run build    # type-checks, then builds to dist/
 npm run lint
 ```
 
-`npm run dev` / `npm run build` first regenerate `public/dictionary.json`
-(from the `cedict-json` package, see `scripts/build-dictionary.mjs`) and
-`public/decomposition.json` (from the vendored
-`third_party/makemeahanzi-dictionary.txt`, see
-`scripts/build-decomposition.mjs`) — both are gitignored since they're
-derived assets, not source.
+`npm run dev` / `npm run build` first regenerate, from third-party sources
+(see `THIRD_PARTY_NOTICES.md`), everything under `public/` that isn't
+checked in: `dictionary.json`, `decomposition.json`, `hanzi-data/`, `ocr/`,
+and `ort/`. All of it is gitignored — derived assets, not source.
+
+`postinstall` runs `patch-package`, which fixes an invalid-UTF-8 byte
+sequence in a transitive OCR dependency (`js-clipper`) that otherwise fails
+the production build — see `THIRD_PARTY_NOTICES.md` for details.
 
 Deploys to GitHub Pages via `.github/workflows/deploy.yml` on pushes to
 `main` that touch this folder.
 
 ## Known limitations / ideas for improvement
 
-Short version: stroke data for Practise loads from a CDN at runtime (no
-bundled offline stroke set), there's no OCR/camera-scan input, no
-spaced-repetition scheduling, and the CC-CEDICT dictionary won't have every
-proper noun or slang term. Mnemonics only cover the ~9.5k characters Make Me
-a Hanzi has decomposition data for, and only some of those have a
-human-written etymology hint — the rest fall back to a generated
-"built from X + Y" breakdown.
+The CC-CEDICT dictionary won't have every proper noun or slang term.
+Mnemonics only cover the ~9.5k characters Make Me a Hanzi has decomposition
+data for, and only some of those have a human-written etymology hint — the
+rest fall back to a generated "built from X + Y" breakdown. There's no
+spaced-repetition scheduling across sessions (the retry queue in Test only
+reshuffles within one sitting), and OCR accuracy on messy handwriting or
+low-light photos will be well below print-quality text.

@@ -6,6 +6,7 @@ import { primeVoices } from './lib/speech';
 import { deleteSavedPhrase, getSavedPhrases, savePhrase } from './lib/storage';
 import { ReaderView } from './components/ReaderView';
 import { SavedList } from './components/SavedList';
+import { InstallButton } from './components/InstallButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import type { Dictionary, SavedPhrase, ViewName } from './types';
 import './App.css';
@@ -135,6 +136,7 @@ function App() {
             <span className="nav-label">Progress</span>
           </button>
         </nav>
+        <InstallButton />
       </header>
 
       <main className="app-main">

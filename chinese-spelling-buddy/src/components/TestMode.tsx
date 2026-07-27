@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import HanziWriter from 'hanzi-writer';
 import { Bookmark, CheckCircle2, ChevronDown, PartyPopper, PenLine, Sparkles, Volume2, X } from 'lucide-react';
 import { isChineseChar } from '../lib/segment';
+import { hanziCharDataLoader } from '../lib/hanziData';
 import { speak, isSpeechSupported } from '../lib/speech';
 import { recordTestAttempt } from '../lib/storage';
 import { groupByDay } from '../lib/groupByDay';
@@ -147,6 +148,7 @@ function QuizSession({ phrase, onExit }: { phrase: SavedPhrase; onExit: () => vo
         showOutline: true,
         strokeAnimationSpeed: 1,
         delayBetweenStrokes: 200,
+        charDataLoader: hanziCharDataLoader,
         onLoadCharDataError: () => {
           if (cancelledRef.current) return;
           setLoadErrorChar(currentCharRef.current);

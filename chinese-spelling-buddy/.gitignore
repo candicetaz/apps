@@ -16,6 +16,11 @@ dist-ssr
 public/dictionary.json
 # Generated at build/dev time by scripts/build-decomposition.mjs from third_party/
 public/decomposition.json
+# Generated at build/dev time by scripts/build-hanzi-data.mjs from hanzi-writer-data
+public/hanzi-data/
+# Generated at build/dev time by scripts/build-ocr-assets.mjs from @gutenye/ocr-models + onnxruntime-web
+public/ocr/
+public/ort/
 
 # Editor directories and files
 .vscode/*

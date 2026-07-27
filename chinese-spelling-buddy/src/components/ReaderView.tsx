@@ -3,6 +3,7 @@ import { Bookmark, CheckCircle2, Grid2x2, Pause, Play, Volume2, X } from 'lucide
 import { segmentAndAnnotate } from '../lib/segment';
 import { isSpeechSupported } from '../lib/speech';
 import { useSpeechPlayback } from '../lib/useSpeechPlayback';
+import { CameraScan } from './CameraScan';
 import { WordDetailPanel } from './WordDetailPanel';
 import type { Dictionary } from '../types';
 
@@ -108,6 +109,12 @@ export function ReaderView({ dict, text, onTextChange, onSave }: ReaderViewProps
       </div>
 
       <div className="reader-toolbar">
+        <CameraScan
+          onConfirm={(lines) => {
+            onTextChange(lines.join('\n'));
+            setSelected(null);
+          }}
+        />
         <button
           type="button"
           className="btn btn-primary"
