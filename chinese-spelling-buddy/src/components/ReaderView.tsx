@@ -5,7 +5,8 @@ import { isSpeechSupported } from '../lib/speech';
 import { useSpeechPlayback } from '../lib/useSpeechPlayback';
 import { CameraScan } from './CameraScan';
 import { WordDetailPanel } from './WordDetailPanel';
-import type { Dictionary } from '../types';
+import { ListPickerPanel } from './ListPickerPanel';
+import type { Dictionary, WordList } from '../types';
 
 const READ_ALOUD_RATE = 0.85;
 
@@ -13,10 +14,23 @@ interface ReaderViewProps {
   dict: Dictionary;
   text: string;
   onTextChange: (text: string) => void;
-  onSave: (text: string) => void;
+  onSave: (text: string, listIds: string[]) => void;
+  lists: WordList[];
+  onCreateList: (name: string) => WordList;
+  onRenameList: (id: string, name: string) => void;
+  onDeleteList: (id: string) => void;
 }
 
-export function ReaderView({ dict, text, onTextChange, onSave }: ReaderViewProps) {
+export function ReaderView({
+  dict,
+  text,
+  onTextChange,
+  onSave,
+  lists,
+  onCreateList,
+  onRenameList,
+  onDeleteList,
+}: ReaderViewProps) {
   const segments = useMemo(() => segmentAndAnnotate(text, dict), [text, dict]);
   const { isSpeaking, isPaused, highlightIndex, play, togglePause } = useSpeechPlayback();
 
@@ -42,42 +56,49 @@ export function ReaderView({ dict, text, onTextChange, onSave }: ReaderViewProps
   const [selected, setSelected] = useState<number | null>(null);
   const [savedFlash, setSavedFlash] = useState<{ count: number } | null>(null);
   const [splitFlash, setSplitFlash] = useState<{ count: number } | null>(null);
+  // Which save action is pending confirmation in the list picker — null
+  // when the picker is closed.
+  const [pendingSaveKind, setPendingSaveKind] = useState<'phrase' | 'words' | null>(null);
+  const [pickerListIds, setPickerListIds] = useState<string[]>([]);
 
   const hasText = text.trim().length > 0;
   const speechSupported = isSpeechSupported();
 
-  function handleSave() {
-    if (!hasText) return;
-    // Each line break is a separate sentence/phrase, so pasting a list of
-    // words saves them individually instead of as one blob.
-    const lines = text
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean);
-    if (lines.length === 0) return;
-
-    lines.forEach((line) => onSave(line));
-    setSavedFlash({ count: lines.length });
-    setTimeout(() => setSavedFlash(null), 1600);
-  }
-
-  function handleSplitSave() {
-    if (!hasText) return;
-    const uniqueWords: string[] = [];
-    const seen = new Set<string>();
-    for (const seg of segments) {
-      if (seg.isChinese && !seen.has(seg.text)) {
-        seen.add(seg.text);
-        uniqueWords.push(seg.text);
+  function confirmSave() {
+    if (pendingSaveKind === 'phrase') {
+      // Each line break is a separate sentence/phrase, so pasting a list of
+      // words saves them individually instead of as one blob.
+      const lines = text
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+      if (lines.length > 0) {
+        lines.forEach((line) => onSave(line, pickerListIds));
+        setSavedFlash({ count: lines.length });
+        setTimeout(() => setSavedFlash(null), 1600);
+      }
+    } else if (pendingSaveKind === 'words') {
+      const uniqueWords: string[] = [];
+      const seen = new Set<string>();
+      for (const seg of segments) {
+        if (seg.isChinese && !seen.has(seg.text)) {
+          seen.add(seg.text);
+          uniqueWords.push(seg.text);
+        }
+      }
+      if (uniqueWords.length > 0) {
+        // Each save prepends to the top of My List, so saving in reverse
+        // order leaves the first word on top, matching reading order.
+        [...uniqueWords].reverse().forEach((word) => onSave(word, pickerListIds));
+        setSplitFlash({ count: uniqueWords.length });
+        setTimeout(() => setSplitFlash(null), 1600);
       }
     }
-    if (uniqueWords.length === 0) return;
+    setPendingSaveKind(null);
+  }
 
-    // Each save prepends to the top of My List, so saving in reverse order
-    // leaves the first word on top, matching reading order.
-    [...uniqueWords].reverse().forEach((word) => onSave(word));
-    setSplitFlash({ count: uniqueWords.length });
-    setTimeout(() => setSplitFlash(null), 1600);
+  function togglePickerList(listId: string) {
+    setPickerListIds((prev) => (prev.includes(listId) ? prev.filter((id) => id !== listId) : [...prev, listId]));
   }
 
   return (
@@ -124,7 +145,15 @@ export function ReaderView({ dict, text, onTextChange, onSave }: ReaderViewProps
           {!isSpeaking ? <Volume2 size={18} aria-hidden="true" /> : isPaused ? <Play size={18} aria-hidden="true" /> : <Pause size={18} aria-hidden="true" />}
           Read aloud
         </button>
-        <button type="button" className="btn btn-accent" onClick={handleSave} disabled={!hasText}>
+        <button
+          type="button"
+          className="btn btn-accent"
+          onClick={() => {
+            setPickerListIds([]);
+            setPendingSaveKind('phrase');
+          }}
+          disabled={!hasText}
+        >
           {savedFlash ? (
             <>
               <CheckCircle2 size={18} aria-hidden="true" />
@@ -137,7 +166,15 @@ export function ReaderView({ dict, text, onTextChange, onSave }: ReaderViewProps
             </>
           )}
         </button>
-        <button type="button" className="btn btn-accent" onClick={handleSplitSave} disabled={!hasText}>
+        <button
+          type="button"
+          className="btn btn-accent"
+          onClick={() => {
+            setPickerListIds([]);
+            setPendingSaveKind('words');
+          }}
+          disabled={!hasText}
+        >
           {splitFlash ? (
             <>
               <CheckCircle2 size={18} aria-hidden="true" />
@@ -192,6 +229,22 @@ export function ReaderView({ dict, text, onTextChange, onSave }: ReaderViewProps
           meanings={segments[selected].meanings}
           dict={dict}
           onClose={() => setSelected(null)}
+        />
+      )}
+
+      {pendingSaveKind && (
+        <ListPickerPanel
+          title={pendingSaveKind === 'phrase' ? 'Save to lists' : 'Save words to lists'}
+          subtitle="Optional — leave none picked to save unfiled"
+          lists={lists}
+          selectedListIds={pickerListIds}
+          onToggleList={togglePickerList}
+          onCreateList={onCreateList}
+          onRenameList={onRenameList}
+          onDeleteList={onDeleteList}
+          onConfirm={confirmSave}
+          confirmLabel="Save"
+          onClose={() => setPendingSaveKind(null)}
         />
       )}
     </div>

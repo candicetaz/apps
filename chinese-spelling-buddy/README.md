@@ -14,13 +14,17 @@ an offline-capable PWA.
   into words with pinyin (context-aware, via `pinyin-pro`) and dictionary
   meanings (from CC-CEDICT). Tap a word for its full definition, hit "Read
   aloud" to hear the whole thing via the browser's speech synthesis, or
-  save it (as one phrase, or split into individual words) to My List.
+  save it (as one phrase, or split into individual words) to My List —
+  optionally picking which custom list(s) to file it under right there in
+  the save dialog, or leaving it unfiled.
 - **My List** — saved phrases grouped by day. Tap a single saved word to
   preview its meaning right there; tap a multi-word phrase to open it in
   Reader instead. Organize words into any number of custom lists (a word
   can belong to several at once, e.g. both "HSK1" and "Animals") via the
   tag icon on each row, and filter the view down to one list with the chips
-  at the top. Delete words or whole lists from the same places.
+  at the top. **Select** switches into multi-select mode to mass-assign
+  several words to a list (or lists) at once. Delete words or whole lists
+  from the same places.
 - **Practise** — stroke-order writing quiz per character, powered by
   `hanzi-writer` against a locally-bundled stroke-data set (no third-party
   CDN dependency). Mistakes are tracked; "Show me how" replays the correct

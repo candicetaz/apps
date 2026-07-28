@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { Bookmark, ChevronDown, Tag, Trash2 } from 'lucide-react';
+import { Bookmark, Check, CheckSquare, ChevronDown, Square, Tag, Trash2, X } from 'lucide-react';
 import { segmentAndAnnotate } from '../lib/segment';
 import { groupByDay } from '../lib/groupByDay';
 import { WordDetailPanel } from './WordDetailPanel';
 import { ListManagerPanel } from './ListManagerPanel';
+import { ListPickerPanel } from './ListPickerPanel';
 import type { Dictionary, SavedPhrase, WordList } from '../types';
 
 interface SavedListProps {
@@ -16,6 +17,7 @@ interface SavedListProps {
   onCreateList: (name: string) => WordList;
   onRenameList: (id: string, name: string) => void;
   onDeleteList: (id: string) => void;
+  onBulkAddToLists: (phraseIds: string[], listIds: string[]) => void;
 }
 
 interface InlineDetail {
@@ -34,10 +36,15 @@ export function SavedList({
   onCreateList,
   onRenameList,
   onDeleteList,
+  onBulkAddToLists,
 }: SavedListProps) {
   const [inlineDetail, setInlineDetail] = useState<InlineDetail | null>(null);
   const [managingPhraseId, setManagingPhraseId] = useState<string | null>(null);
   const [activeListId, setActiveListId] = useState<string | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkPickerOpen, setBulkPickerOpen] = useState(false);
+  const [bulkPickerListIds, setBulkPickerListIds] = useState<string[]>([]);
 
   const managingPhrase = phrases.find((p) => p.id === managingPhraseId) ?? null;
 
@@ -84,29 +91,68 @@ export function SavedList({
     if (activeListId === id) setActiveListId(null);
   }
 
+  function toggleSelectMode() {
+    setSelectMode((prev) => !prev);
+    setSelectedIds(new Set());
+  }
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleBulkPickerList(listId: string) {
+    setBulkPickerListIds((prev) => (prev.includes(listId) ? prev.filter((id) => id !== listId) : [...prev, listId]));
+  }
+
+  function confirmBulkAdd() {
+    onBulkAddToLists(Array.from(selectedIds), bulkPickerListIds);
+    setBulkPickerOpen(false);
+    setBulkPickerListIds([]);
+    setSelectedIds(new Set());
+    setSelectMode(false);
+  }
+
   return (
     <>
-      {lists.length > 0 && (
-        <div className="list-filter-row" role="tablist" aria-label="Filter by list">
-          <button
-            type="button"
-            className={`list-filter-chip ${activeListId === null ? 'list-filter-chip-active' : ''}`}
-            onClick={() => setActiveListId(null)}
-          >
-            All
-          </button>
-          {lists.map((list) => (
+      <div className="saved-toolbar">
+        {lists.length > 0 && (
+          <div className="list-filter-row" role="tablist" aria-label="Filter by list">
             <button
               type="button"
-              key={list.id}
-              className={`list-filter-chip ${activeListId === list.id ? 'list-filter-chip-active' : ''}`}
-              onClick={() => setActiveListId(list.id)}
+              className={`list-filter-chip ${activeListId === null ? 'list-filter-chip-active' : ''}`}
+              onClick={() => setActiveListId(null)}
             >
-              {list.name}
+              All
             </button>
-          ))}
-        </div>
-      )}
+            {lists.map((list) => (
+              <button
+                type="button"
+                key={list.id}
+                className={`list-filter-chip ${activeListId === list.id ? 'list-filter-chip-active' : ''}`}
+                onClick={() => setActiveListId(list.id)}
+              >
+                {list.name}
+              </button>
+            ))}
+          </div>
+        )}
+        <button type="button" className="btn btn-ghost select-mode-btn" onClick={toggleSelectMode}>
+          {selectMode ? (
+            <>
+              <X size={16} aria-hidden="true" /> Cancel
+            </>
+          ) : (
+            <>
+              <CheckSquare size={16} aria-hidden="true" /> Select
+            </>
+          )}
+        </button>
+      </div>
 
       {visiblePhrases.length === 0 ? (
         <p className="empty-state">No words in this list yet. Tap the tag icon on a saved word to add it here.</p>
@@ -124,33 +170,63 @@ export function SavedList({
                 <ul className="saved-list">
                   {group.items.map((p) => (
                     <li key={p.id} className="saved-row">
-                      <button type="button" className="saved-text saved-text-btn" onClick={() => handleTap(p.text)}>
+                      {selectMode && (
+                        <button
+                          type="button"
+                          className="saved-row-checkbox"
+                          onClick={() => toggleSelected(p.id)}
+                          aria-pressed={selectedIds.has(p.id)}
+                          aria-label={`Select "${p.text}"`}
+                        >
+                          {selectedIds.has(p.id) ? (
+                            <Check size={18} aria-hidden="true" />
+                          ) : (
+                            <Square size={18} aria-hidden="true" />
+                          )}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="saved-text saved-text-btn"
+                        onClick={() => (selectMode ? toggleSelected(p.id) : handleTap(p.text))}
+                      >
                         {p.text}
                       </button>
-                      <div className="saved-row-actions">
-                        <button
-                          type="button"
-                          className="icon-btn"
-                          onClick={() => setManagingPhraseId(p.id)}
-                          aria-label={`Manage lists for "${p.text}"`}
-                        >
-                          <Tag size={18} aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          className="icon-btn icon-btn-danger"
-                          onClick={() => onDelete(p.id)}
-                          aria-label={`Delete "${p.text}"`}
-                        >
-                          <Trash2 size={18} aria-hidden="true" />
-                        </button>
-                      </div>
+                      {!selectMode && (
+                        <div className="saved-row-actions">
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            onClick={() => setManagingPhraseId(p.id)}
+                            aria-label={`Manage lists for "${p.text}"`}
+                          >
+                            <Tag size={18} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            className="icon-btn icon-btn-danger"
+                            onClick={() => onDelete(p.id)}
+                            aria-label={`Delete "${p.text}"`}
+                          >
+                            <Trash2 size={18} aria-hidden="true" />
+                          </button>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
               </div>
             </details>
           ))}
+        </div>
+      )}
+
+      {selectMode && selectedIds.size > 0 && (
+        <div className="bulk-action-bar">
+          <span className="bulk-action-count">{selectedIds.size} selected</span>
+          <button type="button" className="btn btn-primary" onClick={() => setBulkPickerOpen(true)}>
+            <Tag size={16} aria-hidden="true" /> Add to list
+          </button>
         </div>
       )}
 
@@ -173,6 +249,22 @@ export function SavedList({
           onRenameList={onRenameList}
           onDeleteList={handleDeleteList}
           onClose={() => setManagingPhraseId(null)}
+        />
+      )}
+
+      {bulkPickerOpen && (
+        <ListPickerPanel
+          title="Add to lists"
+          subtitle={`${selectedIds.size} word${selectedIds.size === 1 ? '' : 's'} selected`}
+          lists={lists}
+          selectedListIds={bulkPickerListIds}
+          onToggleList={toggleBulkPickerList}
+          onCreateList={onCreateList}
+          onRenameList={onRenameList}
+          onDeleteList={onDeleteList}
+          onConfirm={confirmBulkAdd}
+          confirmLabel="Add to list"
+          onClose={() => setBulkPickerOpen(false)}
         />
       )}
     </>

@@ -60,6 +60,15 @@ export function setPhraseListIds(phraseId: string, listIds: string[]): void {
   localStorage.setItem(PHRASES_KEY, JSON.stringify(phrases));
 }
 
+/** Adds the given lists to every named phrase, without touching any list it's already in. */
+export function addPhrasesToLists(phraseIds: string[], listIds: string[]): void {
+  const idSet = new Set(phraseIds);
+  const phrases = getSavedPhrases().map((p) =>
+    idSet.has(p.id) ? { ...p, listIds: Array.from(new Set([...p.listIds, ...listIds])) } : p,
+  );
+  localStorage.setItem(PHRASES_KEY, JSON.stringify(phrases));
+}
+
 export function getLists(): WordList[] {
   return safeParse<WordList[]>(localStorage.getItem(LISTS_KEY), []);
 }

@@ -4,6 +4,7 @@ import { loadDictionary } from './lib/dictionary';
 import { filterToChineseAndPunctuation } from './lib/segment';
 import { primeVoices } from './lib/speech';
 import {
+  addPhrasesToLists,
   createList,
   deleteList,
   deleteSavedPhrase,
@@ -77,8 +78,8 @@ function App() {
     setReaderText(filterToChineseAndPunctuation(text));
   }
 
-  function handleSave(text: string) {
-    savePhrase(text);
+  function handleSave(text: string, listIds: string[] = []) {
+    savePhrase(text, listIds);
     refreshSaved();
   }
 
@@ -117,6 +118,11 @@ function App() {
   function handleDeleteList(id: string) {
     deleteList(id);
     setLists(getLists());
+    refreshSaved();
+  }
+
+  function handleBulkAddToLists(phraseIds: string[], listIds: string[]) {
+    addPhrasesToLists(phraseIds, listIds);
     refreshSaved();
   }
 
@@ -182,7 +188,16 @@ function App() {
 
         <ErrorBoundary key={view}>
           {dict && view === 'reader' && (
-            <ReaderView dict={dict} text={readerText} onTextChange={handleReaderTextChange} onSave={handleSave} />
+            <ReaderView
+              dict={dict}
+              text={readerText}
+              onTextChange={handleReaderTextChange}
+              onSave={handleSave}
+              lists={lists}
+              onCreateList={handleCreateList}
+              onRenameList={handleRenameList}
+              onDeleteList={handleDeleteList}
+            />
           )}
 
           {dict && view === 'saved' && (
@@ -196,6 +211,7 @@ function App() {
               onCreateList={handleCreateList}
               onRenameList={handleRenameList}
               onDeleteList={handleDeleteList}
+              onBulkAddToLists={handleBulkAddToLists}
             />
           )}
 
